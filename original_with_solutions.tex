@@ -1,0 +1,515 @@
+\documentclass[12pt]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[charter]{mathdesign}
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{etoolbox}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.markings}
+
+\geometry{
+ a4paper,
+ left=18mm,
+ right=18mm,
+ top=20mm,
+ bottom=22mm,
+ headheight=10mm,
+}
+
+\definecolor{headerNavy}{HTML}{1B3A5C}
+\definecolor{header}{HTML}{b1caf5}
+\definecolor{Narangi}{HTML}{EF6820}
+\definecolor{accentGold}{HTML}{C5961D}
+\definecolor{accentBlue}{HTML}{2E6DA4}
+\definecolor{softGray}{HTML}{6B7280}
+\definecolor{darkText}{HTML}{1A202C}
+\definecolor{lightBg}{HTML}{F7F8FA}
+\definecolor{borderMed}{HTML}{CBD5E1}
+\definecolor{borderLight}{HTML}{E2E8F0}
+\definecolor{pastelBlue}{HTML}{DBEAFE}
+\definecolor{pastelMint}{HTML}{D1FAE5}
+\definecolor{pastelLavender}{HTML}{E9D5FF}
+\definecolor{cdOrange}{HTML}{E8650A}
+\definecolor{ruleColor}{HTML}{94A3B8}
+\definecolor{brandAccent}{HTML}{06B6D4}
+\definecolor{mycolor}{HTML}{1669b3}
+
+\definecolor{solGreen}{HTML}{16A34A}
+\definecolor{solBg}{HTML}{F0FDF4}
+
+% Auto-green "Correct Answer:" + auto-boxed "Solution:" via preamble-only \textbf redefinition
+\newif\ifinsolutionbox
+\let\oldtextbf\textbf
+\renewcommand{\textbf}[1]{%
+  \def\temp{#1}%
+  \def\tempcomp{Correct Answer:}%
+  \def\tempsol{Solution:}%
+  \ifx\temp\tempcomp
+    {\color{solGreen}\oldtextbf{#1}}%
+  \else\ifx\temp\tempsol
+    \begin{tcolorbox}[enhanced, breakable, colback=solBg, colframe=solGreen!60, boxrule=0.5pt, leftrule=3pt, arc=2pt, left=10pt, right=10pt, top=6pt, bottom=6pt]%
+    \global\insolutionboxtrue
+    {\color{solGreen}\oldtextbf{#1}}%
+  \else
+    \oldtextbf{#1}%
+  \fi\fi
+}
+
+% Auto-close the solution box right before each quicktipbox
+\BeforeBeginEnvironment{quicktipbox}{%
+  \ifinsolutionbox
+    \end{tcolorbox}%
+    \global\insolutionboxfalse
+  \fi
+}
+
+\setstretch{1.45}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{borderMed}\leaders\hrule height
+\footrulewidth\hfill}}
+
+\fancyfoot[L]{\scriptsize\color{softGray} AIIMS Paramedical 2026}
+\fancyfoot[C]{\small\color{softGray} Page \textbf{\thepage}\ of \textbf{\pageref{LastPage}}}
+\fancyfoot[R]{\scriptsize\color{softGray} \copyright\ Collegedunia.com}
+
+\tcbuselibrary{skins, breakable}
+
+% Environment for quick tip boxes (named quicktipbox for Python script compatibility)
+\newtcolorbox{quicktipbox}{
+  enhanced,
+  colback=brandAccent!5,
+  colframe=brandAccent,
+  boxrule=0.5pt,
+  leftrule=3pt,
+  arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fontupper=\small\color{darkText},
+  before upper={\textbf{\color{brandAccent}Quick Tip:}\hspace{6pt}}
+}
+
+\newtcolorbox{sectionheader}[1][]{
+  enhanced,
+  colback=headerNavy!8,
+  colframe=headerNavy!40,
+  boxrule=0.6pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+  fontupper=\large\bfseries\color{headerNavy},
+  halign=center,
+  #1
+}
+
+\newtcolorbox{solutionbox}{
+  breakable,
+  enhanced,
+  colback=solBg,
+  colframe=solGreen,
+  boxrule=0.8pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newcommand{\qnum}[1]{
+  \textbf{\color{headerNavy}#1.}\hspace{3pt}
+}
+
+\newcommand{\questiondivider}{
+  \vspace{5pt}
+  {\centering\color{borderLight}\rule{0.5\textwidth}{0.3pt}\par}
+  \vspace{5pt}
+}
+
+\begin{document}
+\thispagestyle{empty}
+\noindent
+\begin{tikzpicture}[remember picture, overlay]
+  % 1. Main Background
+  \fill[pastelBlue!25]
+    ([yshift=0mm]current page.north west) rectangle 
+    ([yshift=-48mm]current page.north east);
+
+  % 3. Bottom Accent Strip
+  \fill[Narangi!60]
+    ([yshift=-48mm]current page.north west) rectangle
+    ([yshift=-49.5mm]current page.north east);
+
+  % 4. Logo Halo (White circle behind logo to make it stand out)
+  \fill[white, opacity=0.8] 
+    ([xshift=-29mm, yshift=-24mm]current page.north east) circle (19mm);
+
+  % 5. Right: Logo
+  \node[anchor=north east]
+    at ([xshift=-12mm, yshift=-9mm]current page.north east)
+    {\includegraphics[width=0.19\linewidth]{AIIMS.png}};
+
+  % 6. Text Content
+  % Line 1: Main Title
+  \node[anchor=north west, text=headerNavy, font=\fontsize{22}{28}\selectfont\bfseries] (Title)
+    at ([xshift=18mm, yshift=-12mm]current page.north west)
+    {AIIMS Paramedical 2026 };
+
+  % Small divider line
+
+  % Line 2: PCM Subtitle
+  \node[anchor=north west, text=black!85, font=\fontsize{17}{19}\selectfont\bfseries] (Subtitle)
+    at ([xshift=18mm, yshift=-25mm]current page.north west)
+    {Question Paper (Memory-Based) with Solutions};
+
+  % Line 3: Authority
+  \node[anchor=north west, text=black!60, font=\footnotesize] (Authority)
+    at ([xshift=18mm, yshift=-33mm]current page.north west)
+    {Conducted by AIIMS Delhi };
+
+\end{tikzpicture}
+
+\vspace{25mm}
+
+\begin{tcolorbox}[
+    colframe=Narangi!60,
+    colback=white,
+    arc=3mm,
+    boxrule=1.5pt,
+    left=15pt, right=15pt,
+    top=10pt, bottom=10pt
+]
+    {\large\bfseries\color{headerNavy} General Instructions}\\[2pt]
+    {\color{Narangi!60}\rule{4.5cm}{1.5pt}}
+
+\begin{enumerate}[leftmargin=20pt, itemsep=4pt, label={\textbf{\color{headerNavy}(\roman*)}}]
+    \item Duration of the exam is 90 minutes.
+    \item This question paper consists of 90 questions. 
+    \item Question Paper is divided into 3 sections- Physics, Chemistry and Mathematics or Biology having 30 questions each.
+    \item Each question carries 1 mark and their is negative marking of 1/3 for every incorrect answer.
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{6mm}
+
+\begin{sectionheader}[colback=pastelBlue!25, colframe=pastelBlue!55]
+Biology
+\end{sectionheader}
+\vspace{4mm}
+
+
+\noindent \textbf{1.}  
+% Question text  
+\textbf{Oxytocin and Vasopressin are secreted by:} \\  
+
+% Option  
+(A) Anterior pituitary \\  
+% Option  
+(B) Posterior pituitary \\  
+% Option  
+(C) Hypothalamus \\  
+% Option  
+(D) Adrenal gland \\  
+
+\bigskip  
+
+% Correct Answer  
+\noindent \textbf{Correct Answer:} (B) Posterior pituitary  
+
+\bigskip  
+
+% Solution  
+\noindent \textbf{Solution:} \\  
+
+\textbf{Step 1: Understanding the Question:} \\
+The question is based on the human endocrine system, specifically the site of secretion of neurohypophyseal hormones. \\
+It requires identifying which gland is responsible for releasing oxytocin and vasopressin into the systemic circulation. \\
+
+\textbf{Step 2: Key Formula or Approach:} \\
+This is a concept-based biology question. \\
+The approach involves distinguishing between the site of hormone synthesis and the site of hormone secretion. \\
+
+\textbf{Step 3: Detailed Explanation:} \\
+\begin{itemize}
+\item Oxytocin and vasopressin (or antidiuretic hormone, ADH) are nonapeptides synthesized in the hypothalamus. \\
+\item Specifically, oxytocin is synthesized in the neurons of the paraventricular nucleus, while vasopressin is synthesized in the supraoptic nucleus. \\
+\item Following synthesis, these hormones are packaged into secretory granules and transported axonally down the hypothalamo-hypophyseal tract. \\
+\item They terminate and are stored in the posterior pituitary gland (neurohypophysis) in specialized axon terminals called Herring bodies. \\
+\item Upon stimulation by appropriate electrical signals, these hormones are released via exocytosis into the capillary plexus of the posterior pituitary. \\
+\item Thus, while the hypothalamus is the site of synthesis, the posterior pituitary is the anatomical site of storage and secretion into the bloodstream. \\
+\end{itemize}
+
+\textbf{Step 4: Final Answer:} \\
+Since the question asks which organ secretes these hormones, the correct option is the posterior pituitary. \\
+
+\bigskip  
+
+% Quick Tip  
+\begin{quicktipbox}  
+Remember that the posterior pituitary (neurohypophysis) does not synthesize any hormones of its own. \\
+It only stores and secretes hormones that are synthesized by the hypothalamus. \\
+\end{quicktipbox}  
+
+% Topic - Endocrine System  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{2.}  
+% Question text  
+\textbf{The outer layer of Dicot root is called:} \\  
+
+% Option  
+(A) Epidermis \\  
+% Option  
+(B) Endodermis \\  
+% Option  
+(C) Pericycle \\  
+% Option  
+(D) Cortex \\  
+
+\bigskip  
+
+% Correct Answer  
+\noindent \textbf{Correct Answer:} (A) Epidermis  
+
+\bigskip  
+
+% Solution  
+\noindent \textbf{Solution:} \\  
+
+\textbf{Step 1: Understanding the Question:} \\
+The question requires us to identify the outermost tissue layer of a dicotyledonous root. \\
+This is a standard question from plant anatomy focusing on root tissue organization. \\
+
+\textbf{Step 2: Key Formula or Approach:} \\
+We examine the concentric arrangement of tissue layers in a typical dicot root from the outside to the inside. \\
+The order of layers is: Epidermis (Epiblema) $\rightarrow$ Cortex $\rightarrow$ Endodermis $\rightarrow$ Pericycle $\rightarrow$ Vascular Bundles. \\
+
+\textbf{Step 3: Detailed Explanation:} \\
+\begin{itemize}
+\item The outermost layer of a dicot root is called the epidermis, also commonly referred to as the epiblema or piliferous layer. \\
+\item It consists of a single layer of compactly arranged, thin-walled parenchymatous cells. \\
+\item Unlike the stem epidermis, the root epidermis typically lacks a thick cuticle and stomata to allow for efficient water absorption. \\
+\item Many of the epidermal cells protrude outwards to form unicellular root hairs, which significantly increase the surface area for absorption of water and minerals. \\
+\item The layer directly beneath the epidermis is the cortex, which consists of multiple layers of loosely packed parenchyma cells. \\
+\item The endodermis is the innermost layer of the cortex, characterized by barrel-shaped cells containing Casparian strips. \\
+\item The pericycle lies inward to the endodermis and gives rise to lateral roots. \\
+\end{itemize}
+
+\textbf{Step 4: Final Answer:} \\
+Thus, the outermost layer of the dicot root is the epidermis (epiblema). \\
+
+\bigskip  
+
+% Quick Tip  
+\begin{quicktipbox}  
+In root anatomy, the terms 'epidermis', 'epiblema', and 'piliferous layer' are used interchangeably. \\
+Look for these synonyms when solving questions about root tissue systems. \\
+\end{quicktipbox}  
+
+% Topic - Plant Anatomy  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{3.}  
+% Question text  
+\textbf{The notch of kidney where vessels enter is called:} \\  
+
+% Option  
+(A) Hilum \\  
+% Option  
+(B) Pelvis \\  
+% Option  
+(C) Calyx \\  
+% Option  
+(D) Ureter \\  
+
+\bigskip  
+
+% Correct Answer  
+\noindent \textbf{Correct Answer:} (A) Hilum  
+
+\bigskip  
+
+% Solution  
+\noindent \textbf{Solution:} \\  
+
+\textbf{Step 1: Understanding the Question:} \\
+The question asks for the anatomical name of the specific notch on the kidney where blood vessels, nerves, and ureters enter or exit. \\
+This is a fundamental question of renal anatomy. \\
+
+\textbf{Step 2: Key Formula or Approach:} \\
+The approach involves identifying the structural entry and exit portal on the medial surface of the kidney. \\
+We analyze the role and position of the hilum, pelvis, calyx, and ureter. \\
+
+\textbf{Step 3: Detailed Explanation:} \\
+\begin{itemize}
+\item The kidney is a bean-shaped organ located in the retroperitoneal space. \\
+\item On the medial concave border of each kidney, there is a deep, vertical slit or notch known as the renal hilum (or hilus). \\
+\item The hilum serves as the primary gateway for structures entering and leaving the kidney. \\
+\item These structures include the renal artery, renal vein, lymphatic vessels, nerves, and the renal pelvis which leads to the ureter. \\
+\item The renal pelvis is a funnel-shaped structure internal to the hilum that collects urine from the calyces. \\
+\item Calyces (minor and major) are cup-like subdivisions of the pelvis that receive urine from the renal papillae of the medullary pyramids. \\
+\item The ureter is the long muscular tube that carries urine from the renal pelvis to the urinary bladder. \\
+\end{itemize}
+
+\textbf{Step 4: Final Answer:} \\
+The notch on the medial surface where vessels and nerves enter the kidney is the hilum. \\
+
+\bigskip  
+
+% Quick Tip  
+\begin{quicktipbox}  
+To easily recall renal landmarks, remember: \\
+Hilum = Entrance/Exit Gate. \\
+Pelvis = Funnel collector. \\
+Ureter = Transport pipe. \\
+\end{quicktipbox}  
+
+% Topic - Human Excretory System  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{4.}  
+% Question text  
+\textbf{Who is called the Father of Ecology in India?} \\  
+
+% Option  
+(A) Ramdeo Misra \\  
+% Option  
+(B) S. P. Singh \\  
+% Option  
+(C) Salim Ali \\  
+% Option  
+(D) M. S. Swaminathan \\  
+
+\bigskip  
+
+% Correct Answer  
+\noindent \textbf{Correct Answer:} (A) Ramdeo Misra  
+
+\bigskip  
+
+% Solution  
+\noindent \textbf{Solution:} \\  
+
+\textbf{Step 1: Understanding the Question:} \\
+The question asks for the identity of the scientist recognized as the "Father of Ecology in India". \\
+This is a factual and historical question in the field of Indian environmental biology. \\
+
+\textbf{Step 2: Key Formula or Approach:} \\
+We identify the contributions of the listed scientists to find who pioneered ecological research and education in India. \\
+
+\textbf{Step 3: Detailed Explanation:} \\
+\begin{itemize}
+\item Professor Ramdeo Misra is widely recognized as the Father of Ecology in India. \\
+\item He established the first dedicated postgraduate course in ecology at Banaras Hindu University (BHU) in Varanasi. \\
+\item His extensive research on tropical communities, primary productivity, and nutrient cycling laid the foundation for modern ecological studies in the country. \\
+\item He also played an instrumental role in the establishment of the National Committee for Environmental Planning and Coordination, which later evolved into the Ministry of Environment and Forests. \\
+\item Let us evaluate the other options: \\
+\item S. P. Singh is a prominent ecologist known for his work on forest ecology, but is not the founder. \\
+\item Salim Ali is famously known as the "Birdman of India" and was a renowned ornithologist and naturalist. \\
+\item M. S. Swaminathan is internationally celebrated as the "Father of the Green Revolution in India" for his work in agriculture and genetics. \\
+\end{itemize}
+
+\textbf{Step 4: Final Answer:} \\
+Therefore, Professor Ramdeo Misra is the correct choice as the pioneer of Indian ecology. \\
+
+\bigskip  
+
+% Quick Tip  
+\begin{quicktipbox}  
+In biological history questions, associate key terms with scientists: \\
+Ramdeo Misra = Indian Ecology. \\
+M. S. Swaminathan = Green Revolution. \\
+Salim Ali = Ornithology. \\
+\end{quicktipbox}  
+
+% Topic - Ecology  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{5.}  
+% Question text  
+\textbf{Which animal was not Uricotelic?} \\  
+
+% Option  
+(A) Birds \\  
+% Option  
+(B) Land snail \\  
+% Option  
+(C) Reptiles \\  
+% Option  
+(D) Adult Frog \\  
+
+\bigskip  
+
+% Correct Answer  
+\noindent \textbf{Correct Answer:} (D) Adult Frog  
+
+\bigskip  
+
+% Solution  
+\noindent \textbf{Solution:} \\  
+
+\textbf{Step 1: Understanding the Question:} \\
+The question asks to identify the animal among the given options that is NOT uricotelic. \\
+Uricotelic animals are those that excrete nitrogenous waste primarily in the form of uric acid. \\
+
+\textbf{Step 2: Key Formula or Approach:} \\
+We analyze the mode of excretion of different animal groups based on water conservation needs. \\
+Animals are classified into three major groups: \\
+1. Ammonotelic (excrete ammonia, requires high water). \\
+2. Ureotelic (excrete urea, requires moderate water). \\
+3. Uricotelic (excrete uric acid, requires minimal water). \\
+
+\textbf{Step 3: Detailed Explanation:} \\
+\begin{itemize}
+\item Uricotelic organisms excrete uric acid or its salts as a paste or dry pellet. \\
+\item Uric acid is highly insoluble in water and relatively non-toxic, allowing organisms to conserve maximum body water. \\
+\item This is a vital adaptation for terrestrial environments with limited water availability, such as those inhabited by birds, land snails, insects, and reptiles. \\
+\item Consequently, birds, land snails, and reptiles are classically categorized as uricotelic. \\
+\item On the other hand, the adult frog is a semi-aquatic amphibian. \\
+\item Adult frogs live in environments where water is accessible, and they excrete their nitrogenous waste as urea, which is soluble in water and moderately toxic. \\
+\item Thus, adult frogs are ureotelic, not uricotelic. \\
+\item Note that the larval stage of a frog (tadpole) is ammonotelic because it lives exclusively in water. \\
+\end{itemize}
+
+\textbf{Step 4: Final Answer:} \\
+The adult frog is ureotelic, making it the correct option for an animal that is not uricotelic. \\
+
+\bigskip  
+
+% Quick Tip  
+\begin{quicktipbox}  
+An easy way to remember the excretory products based on habitat: \\
+Aquatic (fish, tadpoles) $\rightarrow$ Ammonotelic. \\
+Terrestrial/Semi-aquatic (mammals, adult frogs) $\rightarrow$ Ureotelic. \\
+Highly dry-adapted/Aerial (birds, reptiles, snails) $\rightarrow$ Uricotelic. \\
+\end{quicktipbox}  
+
+% Topic - Excretion  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  

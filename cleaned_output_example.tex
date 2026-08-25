@@ -1,0 +1,315 @@
+\documentclass[12pt]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[charter]{mathdesign}
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{etoolbox}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.markings}
+
+\geometry{
+ a4paper,
+ left=18mm,
+ right=18mm,
+ top=20mm,
+ bottom=22mm,
+ headheight=10mm,
+}
+
+\definecolor{headerNavy}{HTML}{1B3A5C}
+\definecolor{header}{HTML}{b1caf5}
+\definecolor{Narangi}{HTML}{EF6820}
+\definecolor{accentGold}{HTML}{C5961D}
+\definecolor{accentBlue}{HTML}{2E6DA4}
+\definecolor{softGray}{HTML}{6B7280}
+\definecolor{darkText}{HTML}{1A202C}
+\definecolor{lightBg}{HTML}{F7F8FA}
+\definecolor{borderMed}{HTML}{CBD5E1}
+\definecolor{borderLight}{HTML}{E2E8F0}
+\definecolor{pastelBlue}{HTML}{DBEAFE}
+\definecolor{pastelMint}{HTML}{D1FAE5}
+\definecolor{pastelLavender}{HTML}{E9D5FF}
+\definecolor{cdOrange}{HTML}{E8650A}
+\definecolor{ruleColor}{HTML}{94A3B8}
+\definecolor{brandAccent}{HTML}{06B6D4}
+\definecolor{mycolor}{HTML}{1669b3}
+
+\definecolor{solGreen}{HTML}{16A34A}
+\definecolor{solBg}{HTML}{F0FDF4}
+
+% Auto-green "Correct Answer:" + auto-boxed "Solution:" via preamble-only \textbf redefinition
+\newif\ifinsolutionbox
+\let\oldtextbf\textbf
+\renewcommand{\textbf}[1]{%
+  \def\temp{#1}%
+  \def\tempcomp{Correct Answer:}%
+  \def\tempsol{Solution:}%
+  \ifx\temp\tempcomp
+    {\color{solGreen}\oldtextbf{#1}}%
+  \else\ifx\temp\tempsol
+    \begin{tcolorbox}[enhanced, breakable, colback=solBg, colframe=solGreen!60, boxrule=0.5pt, leftrule=3pt, arc=2pt, left=10pt, right=10pt, top=6pt, bottom=6pt]%
+    \global\insolutionboxtrue
+    {\color{solGreen}\oldtextbf{#1}}%
+  \else
+    \oldtextbf{#1}%
+  \fi\fi
+}
+
+% Auto-close the solution box right before each quicktipbox
+\BeforeBeginEnvironment{quicktipbox}{%
+  \ifinsolutionbox
+    \end{tcolorbox}%
+    \global\insolutionboxfalse
+  \fi
+}
+
+\setstretch{1.45}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{borderMed}\leaders\hrule height
+\footrulewidth\hfill}}
+
+\fancyfoot[L]{\scriptsize\color{softGray} AIIMS Paramedical 2026}
+\fancyfoot[C]{\small\color{softGray} Page \textbf{\thepage}\ of \textbf{\pageref{LastPage}}}
+\fancyfoot[R]{\scriptsize\color{softGray} \copyright\ Collegedunia.com}
+
+\tcbuselibrary{skins, breakable}
+
+% Environment for quick tip boxes (named quicktipbox for Python script compatibility)
+\newtcolorbox{quicktipbox}{
+  enhanced,
+  colback=brandAccent!5,
+  colframe=brandAccent,
+  boxrule=0.5pt,
+  leftrule=3pt,
+  arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fontupper=\small\color{darkText},
+  before upper={\textbf{\color{brandAccent}Quick Tip:}\hspace{6pt}}
+}
+
+\newtcolorbox{sectionheader}[1][]{
+  enhanced,
+  colback=headerNavy!8,
+  colframe=headerNavy!40,
+  boxrule=0.6pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt,
+  fontupper=\large\bfseries\color{headerNavy},
+  halign=center,
+  #1
+}
+
+\newtcolorbox{solutionbox}{
+  breakable,
+  enhanced,
+  colback=solBg,
+  colframe=solGreen,
+  boxrule=0.8pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newcommand{\qnum}[1]{
+  \textbf{\color{headerNavy}#1.}\hspace{3pt}
+}
+
+\newcommand{\questiondivider}{
+  \vspace{5pt}
+  {\centering\color{borderLight}\rule{0.5\textwidth}{0.3pt}\par}
+  \vspace{5pt}
+}
+
+\begin{document}
+\thispagestyle{empty}
+\noindent
+\begin{tikzpicture}[remember picture, overlay]
+  % 1. Main Background
+  \fill[pastelBlue!25]
+    ([yshift=0mm]current page.north west) rectangle 
+    ([yshift=-48mm]current page.north east);
+
+  % 3. Bottom Accent Strip
+  \fill[Narangi!60]
+    ([yshift=-48mm]current page.north west) rectangle
+    ([yshift=-49.5mm]current page.north east);
+
+  % 4. Logo Halo (White circle behind logo to make it stand out)
+  \fill[white, opacity=0.8] 
+    ([xshift=-29mm, yshift=-24mm]current page.north east) circle (19mm);
+
+  % 5. Right: Logo
+  \node[anchor=north east]
+    at ([xshift=-12mm, yshift=-9mm]current page.north east)
+    {\includegraphics[width=0.19\linewidth]{AIIMS.png}};
+
+  % 6. Text Content
+  % Line 1: Main Title
+  \node[anchor=north west, text=headerNavy, font=\fontsize{22}{28}\selectfont\bfseries] (Title)
+    at ([xshift=18mm, yshift=-12mm]current page.north west)
+    {AIIMS Paramedical 2026 };
+
+  % Small divider line
+
+  % Line 2: PCM Subtitle
+  \node[anchor=north west, text=black!85, font=\fontsize{17}{19}\selectfont\bfseries] (Subtitle)
+    at ([xshift=18mm, yshift=-25mm]current page.north west)
+    {Question Paper (Memory-Based) with Solutions};
+
+  % Line 3: Authority
+  \node[anchor=north west, text=black!60, font=\footnotesize] (Authority)
+    at ([xshift=18mm, yshift=-33mm]current page.north west)
+    {Conducted by AIIMS Delhi };
+
+\end{tikzpicture}
+
+\vspace{25mm}
+
+\begin{tcolorbox}[
+    colframe=Narangi!60,
+    colback=white,
+    arc=3mm,
+    boxrule=1.5pt,
+    left=15pt, right=15pt,
+    top=10pt, bottom=10pt
+]
+    {\large\bfseries\color{headerNavy} General Instructions}\\[2pt]
+    {\color{Narangi!60}\rule{4.5cm}{1.5pt}}
+
+\begin{enumerate}[leftmargin=20pt, itemsep=4pt, label={\textbf{\color{headerNavy}(\roman*)}}]
+    \item Duration of the exam is 90 minutes.
+    \item This question paper consists of 90 questions. 
+    \item Question Paper is divided into 3 sections- Physics, Chemistry and Mathematics or Biology having 30 questions each.
+    \item Each question carries 1 mark and their is negative marking of 1/3 for every incorrect answer.
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{6mm}
+
+\begin{sectionheader}[colback=pastelBlue!25, colframe=pastelBlue!55]
+Biology
+\end{sectionheader}
+\vspace{4mm}
+
+\noindent \textbf{1.}  
+% Question text  
+\textbf{Oxytocin and Vasopressin are secreted by:} \\  
+
+% Option  
+(A) Anterior pituitary \\  
+% Option  
+(B) Posterior pituitary \\  
+% Option  
+(C) Hypothalamus \\  
+% Option  
+(D) Adrenal gland \\  
+
+\bigskip  
+
+% Topic - Endocrine System  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{2.}  
+% Question text  
+\textbf{The outer layer of Dicot root is called:} \\  
+
+% Option  
+(A) Epidermis \\  
+% Option  
+(B) Endodermis \\  
+% Option  
+(C) Pericycle \\  
+% Option  
+(D) Cortex \\  
+
+\bigskip  
+
+% Topic - Plant Anatomy  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{3.}  
+% Question text  
+\textbf{The notch of kidney where vessels enter is called:} \\  
+
+% Option  
+(A) Hilum \\  
+% Option  
+(B) Pelvis \\  
+% Option  
+(C) Calyx \\  
+% Option  
+(D) Ureter \\  
+
+\bigskip  
+
+% Topic - Human Excretory System  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{4.}  
+% Question text  
+\textbf{Who is called the Father of Ecology in India?} \\  
+
+% Option  
+(A) Ramdeo Misra \\  
+% Option  
+(B) S. P. Singh \\  
+% Option  
+(C) Salim Ali \\  
+% Option  
+(D) M. S. Swaminathan \\  
+
+\bigskip  
+
+% Topic - Ecology  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
+
+\noindent \textbf{5.}  
+% Question text  
+\textbf{Which animal was not Uricotelic?} \\  
+
+% Option  
+(A) Birds \\  
+% Option  
+(B) Land snail \\  
+% Option  
+(C) Reptiles \\  
+% Option  
+(D) Adult Frog \\  
+
+\bigskip  
+
+% Topic - Excretion  
+\vspace{0.5cm}  
+\hrule  
+\vspace{0.5cm}  
