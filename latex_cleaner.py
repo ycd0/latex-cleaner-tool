@@ -43,7 +43,7 @@ import argparse
 import re
 import sys
 
-__all__ = ["clean_latex", "CleanStats"]
+__all__ = ["clean_latex", "wrap_questions_together", "CleanStats"]
 
 
 class CleanStats:
@@ -93,8 +93,54 @@ _FALLBACK_BLOCK_PATTERN = re.compile(
 # Collapse 3+ consecutive blank lines down to 2, left behind after removal.
 _MULTI_BLANK = re.compile(r"\n[ \t]*\n[ \t]*\n+")
 
+# ---------------------------------------------------------------------------
+# Keep-each-question-together.
+#
+# A bare question (stem + options, no solution) is just flowing text/paragraphs
+# with no "don't break here" hint, so LaTeX's page breaker is free to split it
+# anywhere — e.g. options (A)/(B) print at the bottom of one page and (C)/(D)
+# start the next. We fix that by wrapping every question (from its
+# "\noindent \textbf{N.}" number up to the "% Topic" marker that always
+# follows it) in a \minipage. A minipage is an atomic box to TeX's page
+# builder: if it doesn't fully fit in the space left on the current page, the
+# *whole* box moves to the next page instead of being split mid-question.
+# This is safe here because a stem + 4 options is always short — nowhere near
+# a full page tall.
+# ---------------------------------------------------------------------------
+_QUESTION_WRAP_MARKER = "% --- question kept together by latex_cleaner ---"
 
-def clean_latex(text: str, collapse_blank_lines: bool = True) -> tuple[str, CleanStats]:
+_QUESTION_PATTERN = re.compile(
+    r"\\noindent[ \t]*\\textbf\{\d+\.\}.*?"
+    r"(?=[ \t]*%[ \t]*Topic|\\noindent[ \t]*\\textbf\{\d+\.\}|\\end\{document\}|\Z)",
+    re.DOTALL,
+)
+
+
+def _wrap_one_question(match: "re.Match[str]") -> str:
+    body = match.group(0).rstrip("\n")
+    return (
+        f"{_QUESTION_WRAP_MARKER}\n"
+        f"\\begin{{minipage}}[t]{{\\linewidth}}\n"
+        f"{body}\n"
+        f"\\end{{minipage}}\n\n"
+    )
+
+
+def wrap_questions_together(text: str) -> str:
+    """
+    Wrap each numbered question in a \\minipage so it can't be split across a
+    page break (see module notes above). Idempotent: if the text has already
+    been through this pass (detected via _QUESTION_WRAP_MARKER), it's
+    returned unchanged rather than double-wrapped.
+    """
+    if _QUESTION_WRAP_MARKER in text:
+        return text
+    return _QUESTION_PATTERN.sub(_wrap_one_question, text)
+
+
+def clean_latex(
+    text: str, collapse_blank_lines: bool = True, keep_together: bool = True
+) -> tuple[str, CleanStats]:
     """
     Strip Correct-Answer / Solution / Quick-Tip blocks from LaTeX source,
     leaving the preamble, document structure, questions, and options intact.
@@ -106,6 +152,9 @@ def clean_latex(text: str, collapse_blank_lines: bool = True) -> tuple[str, Clea
     collapse_blank_lines : bool
         If True (default), collapse runs of 3+ blank lines left behind by
         the removal down to a single blank line, purely cosmetic.
+    keep_together : bool
+        If True (default), wrap each question in a \\minipage so it can
+        never be split across a page break — see `wrap_questions_together`.
 
     Returns
     -------
@@ -123,6 +172,9 @@ def clean_latex(text: str, collapse_blank_lines: bool = True) -> tuple[str, Clea
 
     if collapse_blank_lines:
         cleaned = _MULTI_BLANK.sub("\n\n", cleaned)
+
+    if keep_together:
+        cleaned = wrap_questions_together(cleaned)
 
     stats = CleanStats(
         blocks_removed=len(matches),
@@ -157,6 +209,12 @@ def _main(argv: list[str] | None = None) -> int:
         help="Do not collapse blank lines left behind by removal",
     )
     parser.add_argument(
+        "--no-keep-together",
+        action="store_true",
+        help="Do not wrap each question in a minipage to prevent it from "
+        "splitting across a page break",
+    )
+    parser.add_argument(
         "--stats",
         action="store_true",
         help="Print removal stats to stderr",
@@ -164,7 +222,11 @@ def _main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     source = args.input.read()
-    cleaned, stats = clean_latex(source, collapse_blank_lines=not args.no_collapse)
+    cleaned, stats = clean_latex(
+        source,
+        collapse_blank_lines=not args.no_collapse,
+        keep_together=not args.no_keep_together,
+    )
     args.output.write(cleaned)
 
     if args.stats:

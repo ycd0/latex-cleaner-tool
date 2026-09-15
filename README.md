@@ -99,3 +99,46 @@ If a file doesn't use the `quicktipbox` environment name, a fallback
 pattern kicks in that stops at the next `% Topic`, `\hrule`, or next
 question number instead — so the tool degrades gracefully rather than
 eating the rest of the document.
+
+## Keeping each question on one page
+
+A bare question (stem + options, no solution) is just flowing LaTeX text
+with nothing telling the page breaker "don't split here" — so a question
+can print its first two options at the bottom of one page and the rest at
+the top of the next.
+
+By default, the cleaner fixes this: it wraps every question — from its
+`\noindent \textbf{N.}` number through the `\bigskip` right before the
+`% Topic` marker — in a `\minipage`. A minipage is an atomic box to TeX's
+page builder: it either fits entirely in the space left on the current
+page, or the *whole* question moves to the next page. Nothing in between.
+This is safe because a stem + 4 options is always short, nowhere near a
+full page tall.
+
+```latex
+% --- question kept together by latex_cleaner ---
+\begin{minipage}[t]{\linewidth}
+\noindent \textbf{1.}
+...options...
+\bigskip
+\end{minipage}
+
+% Topic - ...
+\hrule
+```
+
+The `% Topic` / `\hrule` divider between questions stays outside the
+minipage on purpose — that's the natural, allowed break point between
+questions.
+
+- CLI: pass `--no-keep-together` to turn it off.
+- Library: `clean_latex(text, keep_together=False)`.
+- Web UI: uncheck "Keep each question on one page" in the sidebar.
+- The pass is idempotent — running the cleaner on already-wrapped output
+  leaves it unchanged rather than double-wrapping.
+
+**Caveat:** if a question contains something unusually tall (a large
+diagram/table), the minipage can overflow past the bottom margin instead
+of breaking — you'd notice this immediately when reviewing the PDF. For
+that one question, either turn the option off for that file or manually
+insert `\newpage` before it.

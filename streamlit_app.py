@@ -35,6 +35,13 @@ st.caption(
 with st.sidebar:
     st.header("Options")
     collapse = st.checkbox("Collapse extra blank lines left behind", value=True)
+    keep_together = st.checkbox(
+        "Keep each question on one page (no mid-question page breaks)",
+        value=True,
+        help="Wraps every question in a \\minipage so it can't be split "
+        "across a page — it either fits fully on the current page or the "
+        "whole question moves to the next one.",
+    )
     st.markdown("---")
     st.markdown(
         "**How it works**\n\n"
@@ -61,7 +68,9 @@ elif pasted.strip():
     source_text = pasted
 
 if source_text:
-    cleaned, stats = clean_latex(source_text, collapse_blank_lines=collapse)
+    cleaned, stats = clean_latex(
+        source_text, collapse_blank_lines=collapse, keep_together=keep_together
+    )
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Answer/Solution blocks removed", stats.blocks_removed)

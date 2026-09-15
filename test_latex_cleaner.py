@@ -65,8 +65,35 @@ def test_no_blocks_present_leaves_text_unchanged_content():
     assert cleaned == text
 
 
+def test_keep_together_wraps_question_in_minipage():
+    cleaned, _ = clean_latex(SAMPLE)
+    assert "\\begin{minipage}" in cleaned
+    assert cleaned.count("\\begin{minipage}") == cleaned.count("\\end{minipage}")
+    # the question number/options must be *inside* the minipage, the topic
+    # divider must stay *outside* it (it's the break point between questions)
+    begin_idx = cleaned.index("\\begin{minipage}")
+    end_idx = cleaned.index("\\end{minipage}")
+    assert begin_idx < cleaned.index("\\textbf{1.}") < end_idx
+    assert end_idx < cleaned.index("% Topic - Arithmetic")
+
+
+def test_keep_together_false_leaves_no_minipage():
+    cleaned, _ = clean_latex(SAMPLE, keep_together=False)
+    assert "\\begin{minipage}" not in cleaned
+
+
+def test_keep_together_is_idempotent():
+    once, _ = clean_latex(SAMPLE)
+    twice, stats2 = clean_latex(once)
+    assert once == twice
+    assert stats2.blocks_removed == 0
+
+
 if __name__ == "__main__":
     test_removes_one_block()
     test_idempotent_on_already_clean_file()
     test_no_blocks_present_leaves_text_unchanged_content()
+    test_keep_together_wraps_question_in_minipage()
+    test_keep_together_false_leaves_no_minipage()
+    test_keep_together_is_idempotent()
     print("All tests passed.")
