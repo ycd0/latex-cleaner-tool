@@ -69,24 +69,41 @@ class CleanStats:
 # ---------------------------------------------------------------------------
 # The core pattern.
 #
-# Each answer/solution/tip block starts at a "% Correct Answer" comment (the
-# marker the template always emits right before \textbf{Correct Answer:})
-# and ends at the closing \end{quicktipbox} of the Quick Tip box that always
-# follows the solution. We match everything in between, non-greedily, so a
-# malformed/missing quicktipbox in one question never swallows subsequent
-# questions.
+# Each answer/solution/tip block starts at one of a known set of comment
+# markers and ends at the closing \end{quicktipbox} of the Quick Tip box that
+# always follows the solution. We match everything in between, non-greedily,
+# so a malformed/missing quicktipbox in one question never swallows
+# subsequent questions.
+#
+# Known start markers (extend this list if a future paper uses a new one —
+# grep the source .tex for the "%"-comment that immediately precedes the
+# answer key to find it):
+#   - "% Correct Answer"            — standard single-answer MCQ template
+#   - "% Comprehensive Answers Block" — grouped multi-part "extract" questions
+#     (e.g. "Read the extract... answer (i)-(vi)"), whose answer key is a
+#     series of per-part "(i) Correct Option:" / "(ii) ...:" lines instead of
+#     one "Correct Answer:" line.
 # ---------------------------------------------------------------------------
+_ANSWER_BLOCK_MARKERS = r"Correct Answer|Comprehensive Answers Block"
+
+# A question number label: "1.", "1. (i)", "7. (A)", etc. — the brace can
+# hold anything after the digits+period, not just a bare number, since
+# grouped/multi-part questions (e.g. "Read the extract... (i)-(vi)") number
+# their sub-parts inside the same \textbf{...}.
+_QNUM = r"\\noindent[ \t]*\\textbf\{\d+\.[^}]*\}"
+
 _BLOCK_PATTERN = re.compile(
-    r"[ \t]*%[ \t]*Correct Answer.*?\\end\{quicktipbox\}[ \t]*\n?",
+    r"[ \t]*%[ \t]*(?:" + _ANSWER_BLOCK_MARKERS + r").*?\\end\{quicktipbox\}[ \t]*\n?",
     re.DOTALL,
 )
 
 # Fallback pattern for files that don't use the "quicktipbox" env name but do
-# use the \textbf{Correct Answer:} / \textbf{Solution:} markers — stop at the
-# next "% Topic" comment, next question number, or \hrule, whichever comes
-# first. Used only if the primary pattern finds nothing.
+# use one of the answer-block markers above — stop at the next "% Topic"
+# comment, next question number, or \hrule, whichever comes first. Used only
+# if the primary pattern finds nothing.
 _FALLBACK_BLOCK_PATTERN = re.compile(
-    r"[ \t]*%[ \t]*Correct Answer.*?(?=%[ \t]*Topic|\\hrule|\\noindent[ \t]*\\textbf\{\d+\.\}|\Z)",
+    r"[ \t]*%[ \t]*(?:" + _ANSWER_BLOCK_MARKERS + r").*?"
+    r"(?=%[ \t]*Topic|\\hrule|" + _QNUM + r"|\Z)",
     re.DOTALL,
 )
 
@@ -107,33 +124,29 @@ _MULTI_BLANK = re.compile(r"\n[ \t]*\n[ \t]*\n+")
 # This is safe here because a stem + 4 options is always short — nowhere near
 # a full page tall.
 # ---------------------------------------------------------------------------
-_QUESTION_WRAP_MARKER = "% --- question kept together by latex_cleaner ---"
+_QUESTION_WRAP_OPEN = "\\begin{minipage}[t]{\\linewidth}"
 
 _QUESTION_PATTERN = re.compile(
-    r"\\noindent[ \t]*\\textbf\{\d+\.\}.*?"
-    r"(?=[ \t]*%[ \t]*Topic|\\noindent[ \t]*\\textbf\{\d+\.\}|\\end\{document\}|\Z)",
+    _QNUM + r".*?"
+    r"(?=[ \t]*%[ \t]*Topic|" + _QNUM + r"|\\end\{document\}|\Z)",
     re.DOTALL,
 )
 
 
 def _wrap_one_question(match: "re.Match[str]") -> str:
     body = match.group(0).rstrip("\n")
-    return (
-        f"{_QUESTION_WRAP_MARKER}\n"
-        f"\\begin{{minipage}}[t]{{\\linewidth}}\n"
-        f"{body}\n"
-        f"\\end{{minipage}}\n\n"
-    )
+    return f"{_QUESTION_WRAP_OPEN}\n{body}\n\\end{{minipage}}\n\n"
 
 
 def wrap_questions_together(text: str) -> str:
     """
     Wrap each numbered question in a \\minipage so it can't be split across a
     page break (see module notes above). Idempotent: if the text has already
-    been through this pass (detected via _QUESTION_WRAP_MARKER), it's
-    returned unchanged rather than double-wrapped.
+    been through this pass (detected by the presence of our specific
+    "\\begin{minipage}[t]{\\linewidth}" wrapper), it's returned unchanged
+    rather than double-wrapped.
     """
-    if _QUESTION_WRAP_MARKER in text:
+    if _QUESTION_WRAP_OPEN in text:
         return text
     return _QUESTION_PATTERN.sub(_wrap_one_question, text)
 
