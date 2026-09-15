@@ -83,14 +83,22 @@ class CleanStats:
 #     (e.g. "Read the extract... answer (i)-(vi)"), whose answer key is a
 #     series of per-part "(i) Correct Option:" / "(ii) ...:" lines instead of
 #     one "Correct Answer:" line.
+#   - "% Solution"                  — descriptive/short-answer questions with
+#     no options and thus no "Correct Answer:" line at all — the block goes
+#     straight from the question to the solution. Matched last in the
+#     alternation so it only "wins" when neither of the other two markers is
+#     present earlier in the same block (MCQ blocks always have their own
+#     "% Solution" sub-section too, but "% Correct Answer" appears first in
+#     those, so it's the one the scan latches onto).
 # ---------------------------------------------------------------------------
-_ANSWER_BLOCK_MARKERS = r"Correct Answer|Comprehensive Answers Block"
+_ANSWER_BLOCK_MARKERS = r"Correct Answer|Comprehensive Answers Block|Solution"
 
-# A question number label: "1.", "1. (i)", "7. (A)", etc. — the brace can
-# hold anything after the digits+period, not just a bare number, since
-# grouped/multi-part questions (e.g. "Read the extract... (i)-(vi)") number
-# their sub-parts inside the same \textbf{...}.
-_QNUM = r"\\noindent[ \t]*\\textbf\{\d+\.[^}]*\}"
+# A question number label: "1.", "1. (i)", "7. (A)", "20(a).", "20(b)(i).",
+# etc. — only the leading digits are fixed; everything else in the brace
+# (periods, parenthesized sub-part letters/numerals, in any order) varies by
+# question type, since grouped/multi-part and "OR"-choice sub-questions
+# number their sub-parts inside the same \textbf{...}.
+_QNUM = r"\\noindent[ \t]*\\textbf\{\d+[^}]*\}"
 
 _BLOCK_PATTERN = re.compile(
     r"[ \t]*%[ \t]*(?:" + _ANSWER_BLOCK_MARKERS + r").*?\\end\{quicktipbox\}[ \t]*\n?",

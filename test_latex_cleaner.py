@@ -145,6 +145,74 @@ def test_keep_together_wraps_sub_lettered_question_number():
     assert begin_idx < cleaned.index("\\textbf{7. (A)}") < end_idx
 
 
+# A third real-world format: descriptive/short-answer questions with no
+# options at all, so there's no "% Correct Answer" line — the block goes
+# straight from the question to "% Solution". Also covers the "20(a)."
+# / "20(b)(i)." style OR-choice numbering (digits followed directly by a
+# parenthesized sub-label, period after).
+NO_OPTIONS_SAMPLE = r"""
+\documentclass{article}
+\begin{document}
+
+\noindent \textbf{17.}
+\textbf{Write any two points of difference between X and Y.} \\
+
+\bigskip
+% Solution
+\noindent \textbf{Solution:} \\
+Some explanation. \\
+
+\bigskip
+% Quick Tip
+\begin{quicktipbox}
+A tip.
+\end{quicktipbox}
+
+% Topic - Semiconductors
+\hrule
+
+\noindent \textbf{20(a).}
+\textbf{Derive an expression for something.} \\
+
+\bigskip
+% Solution
+\noindent \textbf{Solution:} \\
+Derivation steps. \\
+
+\bigskip
+% Quick Tip
+\begin{quicktipbox}
+Another tip.
+\end{quicktipbox}
+
+% Topic - Electrostatics
+\hrule
+
+\end{document}
+"""
+
+
+def test_removes_solution_only_block_with_no_options():
+    cleaned, stats = clean_latex(NO_OPTIONS_SAMPLE)
+    assert stats.blocks_removed == 2
+    assert "Solution:" not in cleaned
+    assert "quicktipbox" not in cleaned
+    assert "Write any two points" in cleaned
+    assert "Derive an expression" in cleaned
+    assert "% Topic - Semiconductors" in cleaned
+    assert "% Topic - Electrostatics" in cleaned
+
+
+def test_keep_together_wraps_or_choice_question_number():
+    cleaned, _ = clean_latex(NO_OPTIONS_SAMPLE)
+    assert cleaned.count("\\begin{minipage}") == cleaned.count("\\end{minipage}")
+    assert cleaned.count("\\begin{minipage}") == 2
+    assert "\\textbf{20(a).}" in cleaned
+    begin_idx = cleaned.rindex("\\begin{minipage}")
+    end_idx = cleaned.rindex("\\end{minipage}")
+    assert begin_idx < cleaned.index("\\textbf{20(a).}") < end_idx
+
+
 if __name__ == "__main__":
     test_removes_one_block()
     test_idempotent_on_already_clean_file()
@@ -154,4 +222,6 @@ if __name__ == "__main__":
     test_keep_together_is_idempotent()
     test_removes_grouped_extract_answer_block()
     test_keep_together_wraps_sub_lettered_question_number()
+    test_removes_solution_only_block_with_no_options()
+    test_keep_together_wraps_or_choice_question_number()
     print("All tests passed.")
